@@ -34,21 +34,31 @@ For the next new project setting steps, just leave it with the default settings.
 
 Great! Now we have our project prepared to follow next steps.
 
-## 2. Add OpenCV dependency
+## 2. Import OpenCV module
 Go to **File->New->Import module** and provide a path to **unpacked_OpenCV_package/sdk/java**, where unpacked_OpenCV_package is the directory where you have unpacked the previously downloaded the last openCV version. The name of module is set automatically as **openCVLibraryXXX**, where XXX is your openCV version.
 
 ![](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/importOpencvDependency.png)
 Click next and left all the settings in the next window as they come by default.
+
+## 3. Add OpenCV dependency
+To work with the OpenCV Android library, you have to add it to your app module as a dependency. To easily do this on Android Studio, click on **File -> Project Structure**.
+
+When the project structure dialog opens, click on the app module and click on the **+** green sign in the right window side  and select **Module dependency**. When the choose modules dialog opens, select your **OpenCV library module** and click on **OK**.
+
+Automatically you will return to the dependencies page, where you should see that the openCV module has been added as a dependency. Then click **OK** to finish this step.
+
 Once you have added the dependency, the openCV dependency should have been added to your project structure, as seen in the following image.
 
 ![](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/importOpencvDependency2.png)
 
 Now Android Studio might be showing that there are errors in the project, any worries, we will solve it in the next step.
 
-# Adapting the files
-Go to Android Studio and look at your project structure, you should have a directory named **Gradle Scripts**, open two files of this directory:
+## 4. Adapting the files
+Go to Android Studio and look at your project structure, you should have a directory named **Gradle Scripts** (image below), open two files of this directory:
 1. build.gradle(Module:app)
 2. build.gradle(openCVLibraryXXX), where XXX is your openCV version (my version is 343).
+
+![](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/compilesdkversion.png)
 
 Copy compileSdkVersion from the first file to the second one. In my case compileSdkVersion is 28:
 
@@ -60,8 +70,223 @@ Copy the compileSdkVersion to all targetSdkVersion in **both files**.
 
 In Android Studio, select **Build -> Make Project**. If any error occurr, it should be because you have forget to do any of the previous steps.
 
+## 5. Add Native Libraries
+On your file explorer, navigate to the folder where you extracted the content of the OpenCV Android library zip file. Open the **sdk/native** directory.
+Copy the **libs** folder in the native folder over to your project app module main folder (Usually ProjectName/app/src/main) and rename the libs folder you just copied into your project to **jniLibs**.
+
+## 6. Add pretrained MobileNet deep neural network to the project
+Put previously downloaded **MobileNetSSD_deploy.prototxt** and **MobileNetSSD_deploy.caffemodel** into your project folder **app/build/intermediates/assets/debug**.
+
+## 7. Set main code and add camera permissions
+Following we will change the content of some files in your android project. First of all, we need to add a necessary widget which displays processed frames. Modify **app/src/main/res/layout/activity_main.xml**:
+'''
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+     <org.opencv.android.JavaCameraView
+        android:id="@+id/CameraView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+</FrameLayout>
+'''
+
+Modify **/app/src/main/AndroidManifest.xml** to enable full-screen mode, set up a correct screen orientation and allow to use a camera. **BEFORE REPLACING THE CODE MAKE SURE THAT package (line 3 in the following code) MATCH YOUR ORIGINAL PACKAGE!!! IF NOT, COPY YOUR ORIGINAL package line AND REPLACE IT IN THE CODE I PROVIDE.**
+
+'''
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.opencv.mobilenet_example.mobilenet_opencv_v3">
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar">  <!--Full screen mode--> <!--android:theme="@style/AppTheme"-->
+        <activity android:name=".MainActivity">
+            android:screenOrientation="landscape">  <!--Screen orientation-->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+    <!--Allow to use a camera-->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
+</manifest>
+'''
+
+Replace content of **app/src/main/java/org/opencv/samples/opencv_mobilenet/MainActivity.java**, here it happens the same again, check that your original package name stands in the first line of the code, **you should only replace your original code from line 2 on**:
+
+'''
+package org.opencv.mobilenet_example.mobilenet_opencv_v3;
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.dnn.Net;
+import org.opencv.dnn.Dnn;
+import org.opencv.imgproc.Imgproc;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+public class MainActivity extends AppCompatActivity implements CvCameraViewListener2 {
+    // Initialize OpenCV manager.
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS: {
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    mOpenCvCameraView.enableView();
+                    break;
+                }
+                default: {
+                    super.onManagerConnected(status);
+                    break;
+                }
+            }
+        }
+    };
+    @Override
+    public void onResume() {
+        super.onResume();
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        // Set up camera listener.
+        mOpenCvCameraView = (CameraBridgeViewBase)findViewById(R.id.CameraView);
+        mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+    }
+    // Load a network.
+    public void onCameraViewStarted(int width, int height) {
+        String proto = getPath("MobileNetSSD_deploy.prototxt", this);
+        String weights = getPath("MobileNetSSD_deploy.caffemodel", this);
+        net = Dnn.readNetFromCaffe(proto, weights);
+        Log.i(TAG, "Network loaded successfully");
+    }
+    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+        final int IN_WIDTH = 300;
+        final int IN_HEIGHT = 300;
+        final float WH_RATIO = (float)IN_WIDTH / IN_HEIGHT;
+        final double IN_SCALE_FACTOR = 0.007843;
+        final double MEAN_VAL = 127.5;
+        final double THRESHOLD = 0.2;
+        // Get a new frame
+        Mat frame = inputFrame.rgba();
+        Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2RGB);
+        // Forward image through network.
+        Mat blob = Dnn.blobFromImage(frame, IN_SCALE_FACTOR,
+                new Size(IN_WIDTH, IN_HEIGHT),
+                new Scalar(MEAN_VAL, MEAN_VAL, MEAN_VAL), false);
+        net.setInput(blob);
+        Mat detections = net.forward();
+        int cols = frame.cols();
+        int rows = frame.rows();
+        Size cropSize;
+        if ((float)cols / rows > WH_RATIO) {
+            cropSize = new Size(rows * WH_RATIO, rows);
+        } else {
+            cropSize = new Size(cols, cols / WH_RATIO);
+        }
+        int y1 = (int)(rows - cropSize.height) / 2;
+        int y2 = (int)(y1 + cropSize.height);
+        int x1 = (int)(cols - cropSize.width) / 2;
+        int x2 = (int)(x1 + cropSize.width);
+        Mat subFrame = frame.submat(y1, y2, x1, x2);
+        cols = subFrame.cols();
+        rows = subFrame.rows();
+        detections = detections.reshape(1, (int)detections.total() / 7);
+        for (int i = 0; i < detections.rows(); ++i) {
+            double confidence = detections.get(i, 2)[0];
+            if (confidence > THRESHOLD) {
+                int classId = (int)detections.get(i, 1)[0];
+                int xLeftBottom = (int)(detections.get(i, 3)[0] * cols);
+                int yLeftBottom = (int)(detections.get(i, 4)[0] * rows);
+                int xRightTop   = (int)(detections.get(i, 5)[0] * cols);
+                int yRightTop   = (int)(detections.get(i, 6)[0] * rows);
+                // Draw rectangle around detected object.
+                Imgproc.rectangle(subFrame, new Point(xLeftBottom, yLeftBottom),
+                        new Point(xRightTop, yRightTop),
+                        new Scalar(0, 255, 0));
+                String label = classNames[classId] + ": " + confidence;
+                int[] baseLine = new int[1];
+                Size labelSize = Imgproc.getTextSize(label, Core.FONT_HERSHEY_SIMPLEX, 0.5, 1, baseLine);
+                // Draw background for label.
+                Imgproc.rectangle(subFrame, new Point(xLeftBottom, yLeftBottom - labelSize.height),
+                        new Point(xLeftBottom + labelSize.width, yLeftBottom + baseLine[0]),
+                        new Scalar(255, 255, 255), Core.FILLED);
+                // Write class name and confidence.
+                Imgproc.putText(subFrame, label, new Point(xLeftBottom, yLeftBottom),
+                        Core.FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 0, 0));
+            }
+        }
+        return frame;
+    }
+    public void onCameraViewStopped() {}
+    // Upload file to storage and return a path.
+    private static String getPath(String file, Context context) {
+        AssetManager assetManager = context.getAssets();
+        BufferedInputStream inputStream = null;
+        try {
+            // Read data from assets.
+            inputStream = new BufferedInputStream(assetManager.open(file));
+            byte[] data = new byte[inputStream.available()];
+            inputStream.read(data);
+            inputStream.close();
+            // Create copy file in storage.
+            File outFile = new File(context.getFilesDir(), file);
+            FileOutputStream os = new FileOutputStream(outFile);
+            os.write(data);
+            os.close();
+            // Return a path to file which may be read in common way.
+            return outFile.getAbsolutePath();
+        } catch (IOException ex) {
+            Log.i(TAG, "Failed to upload a file");
+        }
+        return "";
+    }
+    private static final String TAG = "OpenCV/Sample/MobileNet";
+    private static final String[] classNames = {"background",
+            "aeroplane", "bicycle", "bird", "boat",
+            "bottle", "bus", "car", "cat", "chair",
+            "cow", "diningtable", "dog", "horse",
+            "motorbike", "person", "pottedplant",
+            "sheep", "sofa", "train", "tvmonitor"};
+    private Net net;
+    private CameraBridgeViewBase mOpenCvCameraView;
+}
+'''
+
 ## Smartphone emulator setting
 To create our own smartphone emulator go to Android Studio, select **Tools -> AVG Manager**. A new window listing your current virtual devices will pop up. If you want to create a new one, select **Create Virtual Device...**
+
 
 
 smartphone camera to pc
