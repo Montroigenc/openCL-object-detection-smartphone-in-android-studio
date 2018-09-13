@@ -309,4 +309,4 @@ Now go again to Android Studio and go to **Run -> Run 'app'**, select your smart
 
 While the app is starting in your emulated smartphone, hour app name should appear in the **Apps & notifications** folder we have opened. Once you can see the name of your app, click on it and go to **Permissions**, here you could give to your app the permission to use the smartphone camera.
 
-Great!! You have done all the configuration steps, and when you app starts in your emulator you could play identifying your surrounding objects, yourself or your favourite pet!
+Great!! You have done all the configuration steps, and when you app starts in your emulator you could play identifying your surrounding objects, yourself or your favourite pet, have fun!
