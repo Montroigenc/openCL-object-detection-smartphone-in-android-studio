@@ -79,7 +79,7 @@ Put previously downloaded **MobileNetSSD_deploy.prototxt** and **MobileNetSSD_de
 
 ## 7. Set main code and add camera permissions
 Following we will change the content of some files in your android project. First of all, we need to add a necessary widget which displays processed frames. Modify **app/src/main/res/layout/activity_main.xml**:
-'''
+```
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -93,11 +93,11 @@ Following we will change the content of some files in your android project. Firs
         android:layout_height="match_parent"
         android:visibility="visible" />
 </FrameLayout>
-'''
+```
 
 Modify **/app/src/main/AndroidManifest.xml** to enable full-screen mode, set up a correct screen orientation and allow to use a camera. **BEFORE REPLACING THE CODE MAKE SURE THAT package (line 3 in the following code) MATCH YOUR ORIGINAL PACKAGE!!! IF NOT, COPY YOUR ORIGINAL package line AND REPLACE IT IN THE CODE I PROVIDE.**
 
-'''
+```
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.opencv.mobilenet_example.mobilenet_opencv_v3">
@@ -123,11 +123,11 @@ Modify **/app/src/main/AndroidManifest.xml** to enable full-screen mode, set up 
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
 </manifest>
-'''
+```
 
 Replace content of **app/src/main/java/org/opencv/samples/opencv_mobilenet/MainActivity.java**, here it happens the same again, check that your original package name stands in the first line of the code, **you should only replace your original code from line 2 on**:
 
-'''
+```
 package org.opencv.mobilenet_example.mobilenet_opencv_v3;
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     private Net net;
     private CameraBridgeViewBase mOpenCvCameraView;
 }
-'''
+```
 
 ## Smartphone emulator setting
 To create our own smartphone emulator go to Android Studio, select **Tools -> AVG Manager**. A new window listing your current virtual devices will pop up. If you want to create a new one, select **Create Virtual Device...**
