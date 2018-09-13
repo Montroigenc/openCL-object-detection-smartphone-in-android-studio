@@ -35,10 +35,33 @@ For the next new project setting steps, just leave it with the default settings.
 Great! Now we have our project prepared to follow next steps.
 
 ## 2. Add OpenCV dependency
-Go to File->New->Import module and provide a path to unpacked_OpenCV_package/sdk/java. The name of module is set automatically.
+Go to **File->New->Import module** and provide a path to **unpacked_OpenCV_package/sdk/java**, where unpacked_OpenCV_package is the directory where you have unpacked the previously downloaded the last openCV version. The name of module is set automatically as **openCVLibraryXXX**, where XXX is your openCV version.
 
+![](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/importOpencvDependency.png)
+Click next and left all the settings in the next window as they come by default.
+Once you have added the dependency, the openCV dependency should have been added to your project structure, as seen in the following image.
 
+![](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/importOpencvDependency2.png)
 
+Now Android Studio might be showing that there are errors in the project, any worries, we will solve it in the next step.
+
+# Adapting the files
+Go to Android Studio and look at your project structure, you should have a directory named **Gradle Scripts**, open two files of this directory:
+1. build.gradle(Module:app)
+2. build.gradle(openCVLibraryXXX), where XXX is your openCV version (my version is 343).
+
+Copy compileSdkVersion from the first file to the second one. In my case compileSdkVersion is 28:
+
+**compileSdkVersion 14 -> compileSdkVersion 28**
+
+Copy the compileSdkVersion to all targetSdkVersion in **both files**.
+
+**targetSdkVersion 14 -> targetSdkVersion 28**
+
+In Android Studio, select **Build -> Make Project**. If any error occurr, it should be because you have forget to do any of the previous steps.
+
+## Smartphone emulator setting
+To create our own smartphone emulator go to Android Studio, select **Tools -> AVG Manager**. A new window listing your current virtual devices will pop up. If you want to create a new one, select **Create Virtual Device...**
 
 
 smartphone camera to pc
