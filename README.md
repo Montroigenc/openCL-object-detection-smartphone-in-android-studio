@@ -287,8 +287,26 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 ## Smartphone emulator setting
 To create our own smartphone emulator go to Android Studio, select **Tools -> AVG Manager**. A new window listing your current virtual devices will pop up. If you want to create a new one, select **Create Virtual Device...**
 
+![img](https://github.com/Montroigenc/openCL-object-detection-in-android-studio/blob/master/AVGmanager.png)
 
+Once the Select Hardware window pops up, we have to select **Phone** Category and we could choose **Nexus 5X** as our target emulation device. Click on next and in the **Recommended** sheet, assure that you have your target API downloaded, in my case it is the API 28. If you don't have it, click on the blue **Download** link just in the right of the Release Name you want. 
 
-smartphone camera to pc
-enable camera in emulator
+In the next window (Verify Configuration), click on **Show Advanced Settings**. Scroll down to the Camera settings. Here you can decide if you want to use your PC camera or you prefer a VirtualScene. Make your choice and click on the **Finish** button.
 
+AWESOME! Now we have our smartphone emulator ready!
+
+To start it, open the AVG Manager window if you have not opened yet and click on the green play button on the Actions box.
+
+To allow the use of openCV in you emulated smartphone, you shoud install appropriate OpenCV manager. To do it, you have to open a terminal window in unpacked_OpenCV_package/apk, where you have different apk versions, **make sure you are executing the one that matches your emulated smartphone settings (in my case OpenCV_3.4.3_Manager_3.43_x86_64.apk)**, and run:
+
+**adb install OpenCV_3.4.3_Manager_3.43_x86_64.apk**
+
+In the prompt window a **SUCCESS** message should appear, if not, probably you have not selected the appropiate apk version.
+
+Once your device had been completely started, you should drag your cursor in the smartphone main screen to open the app menu. Then select **Settings** and following **Apps & notifications**.
+
+Now go again to Android Studio and go to **Run -> Run 'app'**, select your smartphone emulator device (should be currently running, in the case of this example it is the Nexus 5X).
+
+While the app is starting in your emulated smartphone, hour app name should appear in the **Apps & notifications** folder we have opened. Once you can see the name of your app, click on it and go to **Permissions**, here you could give to your app the permission to use the smartphone camera.
+
+Great!! You have done all the configuration steps, and when you app starts in your emulator you could play identifying your surrounding objects, yourself or your favourite pet!
