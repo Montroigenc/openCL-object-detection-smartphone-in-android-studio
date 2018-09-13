@@ -6,10 +6,10 @@ Implementation of an object detection algorithm in an android studio emulator us
 This tutorial was originally written by OpenCV developers (https://docs.opencv.org/3.4/d0/d6c/tutorial_dnn_android.html), but some tricks are added here in order to solve some installation problems and enable the use of an emulated device using Android Studio.
 
 This tutorial was written for the following versions of corresponding software:
+- Android Studio 3.1.4
+- penCV 3.4.3
+- Ubuntu 18.04
 
-Android Studio 3.1.4
-OpenCV 3.4.3
-Ubuntu 18.04
 
 # Requirements
 Download and install Android Studio from https://developer.android.com/studio.
